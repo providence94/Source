@@ -8,6 +8,10 @@
 AUnsealed4x4GameMode::AUnsealed4x4GameMode(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	DefaultPawnClass = AUnsealed4x4Pawn::StaticClass();
+	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnClassFinder(TEXT("Class'/Game/Offroad4x4Content/Vehicle/Unsealed.Unsealed_C'"));
+	DefaultPawnClass = PlayerPawnClassFinder.Class;
 	HUDClass = AUnsealed4x4Hud::StaticClass();
+	static ConstructorHelpers::FClassFinder<APlayerController> PlayerController(TEXT("Class'/Game/Offroad4x4Content/Vehicle/UnsealedPlayerController.UnsealedPlayerController_C'"));
+	PlayerControllerClass = PlayerController.Class;
+	
 }

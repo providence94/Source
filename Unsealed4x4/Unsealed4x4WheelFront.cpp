@@ -6,8 +6,12 @@
 UUnsealed4x4WheelFront::UUnsealed4x4WheelFront(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	ShapeRadius = 18.f;
-	ShapeWidth = 15.0f;
+	
+	ShapeRadius = 40.f;
+	ShapeWidth = 34.0f;
 	bAffectedByHandbrake = false;
 	SteerAngle = 40.f;
+	DampingRate = 0.25f;
+	Mass = 20;
+	
 }

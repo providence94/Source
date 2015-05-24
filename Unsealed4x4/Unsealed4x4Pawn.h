@@ -38,12 +38,20 @@ class AUnsealed4x4Pawn : public AWheeledVehicle
 	UPROPERTY(Category = Display, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UAudioComponent* EngineSoundComponent;
 
+	
+
 public:
 	AUnsealed4x4Pawn(const FObjectInitializer& ObjectInitializer);
 
 	/** The current speed as a string eg 10 km/h */
 	UPROPERTY(Category = Display, VisibleDefaultsOnly, BlueprintReadOnly)
 	FText SpeedDisplayString;
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Acceleration")
+    void AutoAcceleration();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Acceleration")
+	bool isAutoAccel;
 
 	/** The current gear as a string (R,N, 1,2 etc) */
 	UPROPERTY(Category = Display, VisibleDefaultsOnly, BlueprintReadOnly)
@@ -73,11 +81,13 @@ public:
 	// End Pawn interface
 
 	// Begin Actor interface
+	
 	virtual void Tick(float Delta) override;
 	virtual void BeginPlay() override;
 	// End Actor interface
 
 	/** Handle pressing forwards */
+	
 	void MoveForward(float Val);
 
 	/** Setup the strings used on the hud */

@@ -15,13 +15,6 @@
 #include "Vehicles/WheeledVehicleMovementComponent4W.h"
 #include "Engine/SkeletalMesh.h"
 
-
-#ifdef HMD_INTGERATION
-// Needed for VR Headset
-#include "Engine.h"
-#include "IHeadMountedDisplay.h"
-#endif // HMD_INTGERATION
-
 const FName AUnsealed4x4Pawn::LookUpBinding("LookUp");
 const FName AUnsealed4x4Pawn::LookRightBinding("LookRight");
 const FName AUnsealed4x4Pawn::EngineAudioRPM("RPM");
@@ -31,11 +24,13 @@ const FName AUnsealed4x4Pawn::EngineAudioRPM("RPM");
 AUnsealed4x4Pawn::AUnsealed4x4Pawn(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	// Car mesh
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CarMesh(TEXT("/Game/VehicleAdv/Vehicle/Vehicle_SkelMesh.Vehicle_SkelMesh"));
+	// Car mesh 
+	//static ConstructorHelpers::FObjectFinder<USkeletalMesh> CarMesh(TEXT("/Game/VehicleAdv/Vehicle/Vehicle_SkelMesh.Vehicle_SkelMesh")); //default one
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CarMesh(TEXT("/Game/Offroad4x4Content/Vehicle/Amorok_01_buggy.Amorok_01_buggy")); // dummy by tim
 	GetMesh()->SetSkeletalMesh(CarMesh.Object);
 	
-	static ConstructorHelpers::FClassFinder<UObject> AnimBPClass(TEXT("/Game/VehicleAdv/Vehicle/VehicleAnimationBlueprint"));
+	//static ConstructorHelpers::FClassFinder<UObject> AnimBPClass(TEXT("/Game/VehicleAdv/Vehicle/VehicleAnimationBlueprint"));
+	static ConstructorHelpers::FClassFinder<UObject> AnimBPClass(TEXT("/Game/Offroad4x4Content/Vehicle/Amorok_Anim"));
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	GetMesh()->SetAnimInstanceClass(AnimBPClass.Class);
 
@@ -53,19 +48,19 @@ AUnsealed4x4Pawn::AUnsealed4x4Pawn(const FObjectInitializer& ObjectInitializer)
 	// Wheels/Tyres
 	// Setup the wheels
 	Vehicle4W->WheelSetups[0].WheelClass = UUnsealed4x4WheelFront::StaticClass();
-	Vehicle4W->WheelSetups[0].BoneName = FName("PhysWheel_FL");
+	Vehicle4W->WheelSetups[0].BoneName = FName("F_L_wheelJNT");
 	Vehicle4W->WheelSetups[0].AdditionalOffset = FVector(0.f, -8.f, 0.f);
 
 	Vehicle4W->WheelSetups[1].WheelClass = UUnsealed4x4WheelFront::StaticClass();
-	Vehicle4W->WheelSetups[1].BoneName = FName("PhysWheel_FR");
+	Vehicle4W->WheelSetups[1].BoneName = FName("F_R_wheelJNT");
 	Vehicle4W->WheelSetups[1].AdditionalOffset = FVector(0.f, 8.f, 0.f);
 
 	Vehicle4W->WheelSetups[2].WheelClass = UUnsealed4x4WheelRear::StaticClass();
-	Vehicle4W->WheelSetups[2].BoneName = FName("PhysWheel_BL");
+	Vehicle4W->WheelSetups[2].BoneName = FName("B_L_wheelJNT");
 	Vehicle4W->WheelSetups[2].AdditionalOffset = FVector(0.f, -8.f, 0.f);
 
 	Vehicle4W->WheelSetups[3].WheelClass = UUnsealed4x4WheelRear::StaticClass();
-	Vehicle4W->WheelSetups[3].BoneName = FName("PhysWheel_BR");
+	Vehicle4W->WheelSetups[3].BoneName = FName("B_R_wheelJNT");
 	Vehicle4W->WheelSetups[3].AdditionalOffset = FVector(0.f, 8.f, 0.f);
 
 	// Adjust the tire loading
@@ -90,7 +85,7 @@ AUnsealed4x4Pawn::AUnsealed4x4Pawn(const FObjectInitializer& ObjectInitializer)
 			
  	// Transmission	
 	// We want 4wd
-	Vehicle4W->DifferentialSetup.DifferentialType = EVehicleDifferential4W::LimitedSlip_4W;
+	Vehicle4W->DifferentialSetup.DifferentialType = EVehicleDifferential4W::LimitedSlip_RearDrive;
 	
 	// Drive the front wheels a little more than the rear
 	Vehicle4W->DifferentialSetup.FrontRearSplit = 0.65;
@@ -111,12 +106,12 @@ AUnsealed4x4Pawn::AUnsealed4x4Pawn(const FObjectInitializer& ObjectInitializer)
 
 	// Create a spring arm component for our chase camera
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
-	SpringArm->SetRelativeLocation(FVector(0.0f, 0.0f, 34.0f));
-	SpringArm->SetWorldRotation(FRotator(-20.0f, 0.0f, 0.0f));
+	SpringArm->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
+	SpringArm->SetRelativeLocation(FVector(0.0f, 0.000f, 0.0f));
 	SpringArm->AttachTo(RootComponent);
-	SpringArm->TargetArmLength = 125.0f;
-	SpringArm->bEnableCameraLag = false;
-	SpringArm->bEnableCameraRotationLag = false;
+	SpringArm->TargetArmLength = 200.0f;
+	SpringArm->bEnableCameraLag = true;
+	SpringArm->bEnableCameraRotationLag = true;
 	SpringArm->bInheritPitch = true;
 	SpringArm->bInheritYaw = true;
 	SpringArm->bInheritRoll = true;
@@ -124,7 +119,8 @@ AUnsealed4x4Pawn::AUnsealed4x4Pawn(const FObjectInitializer& ObjectInitializer)
 	// Create the chase camera component 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("ChaseCamera"));
 	Camera->AttachTo(SpringArm, USpringArmComponent::SocketName);
-	Camera->SetRelativeRotation(FRotator(10.0f, 0.0f, 0.0f));
+	Camera->SetRelativeRotation(FRotator(-20.0f, 0.0f, 0.0f)); 
+	Camera->SetRelativeLocation(FVector(-500.0f, 0.000000f, 300.0f));
 	Camera->bUsePawnControlRotation = false;
 	Camera->FieldOfView = 90.f;
 
@@ -238,37 +234,26 @@ void AUnsealed4x4Pawn::EnableIncarView(const bool bState)
 	}
 }
 
+
 void AUnsealed4x4Pawn::Tick(float Delta)
 {
 	// Setup the flag to say we are in reverse gear
 	bInReverseGear = GetVehicleMovement()->GetCurrentGear() < 0;
 	
+	/*if (isAutoAccel && GetVehicleMovement()->IsMovingOnGround())
+	{
+		AutoAcceleration();
+	}*/
 	// Update phsyics material
 	UpdatePhysicsMaterial();
-
+	
+	
 	// Update the strings used in the hud (incar and onscreen)
 	UpdateHUDStrings();
 
 	// Set the string in the incar hud
 	SetupInCarHUD();
-
-	bool bHMDActive = false;
-#ifdef HMD_INTGERATION
-	if ((GEngine->HMDDevice.IsValid() == true ) && ( (GEngine->HMDDevice->IsHeadTrackingAllowed() == true) || (GEngine->IsStereoscopic3D() == true)))
-	{
-		bHMDActive = true;
-	}
-#endif // HMD_INTGERATION
-	if( bHMDActive == false )
-	{
-		if ( (InputComponent) && (bInCarCameraActive == true ))
-		{
-			FRotator HeadRotation = InternalCamera->RelativeRotation;
-			HeadRotation.Pitch += InputComponent->GetAxisValue(LookUpBinding);
-			HeadRotation.Yaw += InputComponent->GetAxisValue(LookRightBinding);
-			InternalCamera->RelativeRotation = HeadRotation;
-		}
-	}	
+	
 
 	// Pass the engine RPM to the sound component
 	float RPMToAudioScale = 2500.0f / GetVehicleMovement()->GetEngineMaxRotationSpeed();
